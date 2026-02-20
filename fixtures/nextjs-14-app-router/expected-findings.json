@@ -1,0 +1,8 @@
+[
+  {
+    "longId": "dxy:next/withRouter:src/legacy.tsx:9:16",
+    "kind": "deprecated-api",
+    "severity": "warning",
+    "message": "next.withRouter is deprecated. Use useRouter from next/navigation instead."
+  }
+]

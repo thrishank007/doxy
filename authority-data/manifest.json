@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": "0.1.0",
+  "packages": [
+    {
+      "name": "react",
+      "latestMappedVersion": "19.0.0",
+      "specFile": "react/react.json"
+    },
+    {
+      "name": "react-dom",
+      "latestMappedVersion": "19.0.0",
+      "specFile": "react-dom/react-dom.json"
+    }
+  ]
+}

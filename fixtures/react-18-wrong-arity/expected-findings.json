@@ -1,0 +1,20 @@
+[
+  {
+    "longId": "dxy:react/useState:src/App.tsx:5:32",
+    "kind": "wrong-arity",
+    "severity": "error",
+    "message": "react.useState expects 0-1 arguments, but was called with 2."
+  },
+  {
+    "longId": "dxy:react/useReducer:src/App.tsx:8:36",
+    "kind": "wrong-arity",
+    "severity": "error",
+    "message": "react.useReducer expects 2-3 arguments, but was called with 0."
+  },
+  {
+    "longId": "dxy:react/useRef:src/App.tsx:11:15",
+    "kind": "wrong-arity",
+    "severity": "error",
+    "message": "react.useRef expects 0-1 arguments, but was called with 3."
+  }
+]

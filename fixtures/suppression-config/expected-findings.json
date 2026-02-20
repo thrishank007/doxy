@@ -1,0 +1,8 @@
+[
+  {
+    "longId": "dxy:react-dom/findDOMNode:src/App.tsx:10:18",
+    "kind": "deprecated-api",
+    "severity": "warning",
+    "message": "react-dom.findDOMNode is deprecated since 16.6.0. Use refs instead."
+  }
+]

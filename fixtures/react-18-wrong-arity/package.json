@@ -1,0 +1,7 @@
+{
+  "name": "fixture-react-18-wrong-arity",
+  "private": true,
+  "dependencies": {
+    "react": "18.2.0"
+  }
+}

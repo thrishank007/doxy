@@ -1,0 +1,20 @@
+[
+  {
+    "longId": "dxy:react/useId:src/App.tsx:5:14",
+    "kind": "future-api",
+    "severity": "error",
+    "message": "react.useId is not available in 17.0.2. It was added in 18.0.0."
+  },
+  {
+    "longId": "dxy:react/useTransition:src/App.tsx:6:40",
+    "kind": "future-api",
+    "severity": "error",
+    "message": "react.useTransition is not available in 17.0.2. It was added in 18.0.0."
+  },
+  {
+    "longId": "dxy:react/useDeferredValue:src/App.tsx:7:20",
+    "kind": "future-api",
+    "severity": "error",
+    "message": "react.useDeferredValue is not available in 17.0.2. It was added in 18.0.0."
+  }
+]

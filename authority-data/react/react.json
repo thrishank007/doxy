@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "package": "react",
+  "specs": [
+    {
+      "package": "react",
+      "export": "useState",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 0,
+          "maxArity": 1,
+          "params": [
+            { "name": "initialState", "required": false, "description": "Initial state value or initializer function" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useState"
+    },
+    {
+      "package": "react",
+      "export": "useEffect",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 1,
+          "maxArity": 2,
+          "params": [
+            { "name": "setup", "required": true, "description": "Effect function" },
+            { "name": "dependencies", "required": false, "description": "Dependency array" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useEffect"
+    },
+    {
+      "package": "react",
+      "export": "useCallback",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 2,
+          "maxArity": 2,
+          "params": [
+            { "name": "fn", "required": true, "description": "Callback function to memoize" },
+            { "name": "dependencies", "required": true, "description": "Dependency array" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useCallback"
+    },
+    {
+      "package": "react",
+      "export": "useMemo",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 2,
+          "maxArity": 2,
+          "params": [
+            { "name": "calculateValue", "required": true, "description": "Function to compute memoized value" },
+            { "name": "dependencies", "required": true, "description": "Dependency array" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useMemo"
+    },
+    {
+      "package": "react",
+      "export": "useRef",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 0,
+          "maxArity": 1,
+          "params": [
+            { "name": "initialValue", "required": false, "description": "Initial ref value" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useRef"
+    },
+    {
+      "package": "react",
+      "export": "useReducer",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 2,
+          "maxArity": 3,
+          "params": [
+            { "name": "reducer", "required": true, "description": "Reducer function" },
+            { "name": "initialArg", "required": true, "description": "Initial state value or argument to initializer" },
+            { "name": "init", "required": false, "description": "Initializer function" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useReducer"
+    },
+    {
+      "package": "react",
+      "export": "useContext",
+      "kind": "hook",
+      "availableIn": ">=16.8.0",
+      "signatures": [
+        {
+          "since": "16.8.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "context", "required": true, "description": "Context object created by createContext" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useContext"
+    },
+    {
+      "package": "react",
+      "export": "useId",
+      "kind": "hook",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 0,
+          "maxArity": 0,
+          "params": []
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useId"
+    },
+    {
+      "package": "react",
+      "export": "useTransition",
+      "kind": "hook",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 0,
+          "maxArity": 0,
+          "params": []
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useTransition"
+    },
+    {
+      "package": "react",
+      "export": "useDeferredValue",
+      "kind": "hook",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "value", "required": true, "description": "Value to defer" }
+          ]
+        },
+        {
+          "since": "19.0.0",
+          "minArity": 1,
+          "maxArity": 2,
+          "params": [
+            { "name": "value", "required": true, "description": "Value to defer" },
+            { "name": "initialValue", "required": false, "description": "Initial value for first render" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useDeferredValue"
+    },
+    {
+      "package": "react",
+      "export": "createContext",
+      "kind": "function",
+      "availableIn": ">=16.3.0",
+      "signatures": [
+        {
+          "since": "16.3.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "defaultValue", "required": true, "description": "Default context value" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/createContext"
+    },
+    {
+      "package": "react",
+      "export": "createElement",
+      "kind": "function",
+      "availableIn": ">=0.14.0",
+      "signatures": [
+        {
+          "since": "0.14.0",
+          "minArity": 1,
+          "maxArity": 9999,
+          "params": [
+            { "name": "type", "required": true, "description": "Element type (tag name, component, or fragment)" },
+            { "name": "props", "required": false, "description": "Props object" },
+            { "name": "children", "required": false, "description": "Child elements" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/createElement"
+    },
+    {
+      "package": "react",
+      "export": "createFactory",
+      "kind": "function",
+      "availableIn": ">=0.14.0 <19.0.0",
+      "signatures": [
+        {
+          "since": "0.14.0",
+          "until": "19.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "type", "required": true, "description": "Element type" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "16.13.0",
+          "removedIn": "19.0.0",
+          "message": "react.createFactory is deprecated. Use React.createElement or JSX instead.",
+          "replacement": {
+            "package": "react",
+            "export": "createElement",
+            "migrationHint": "Replace createFactory(type) with createElement(type, props, ...children) or use JSX."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react/createFactory"
+    },
+    {
+      "package": "react",
+      "export": "createRef",
+      "kind": "function",
+      "availableIn": ">=16.3.0",
+      "signatures": [
+        {
+          "since": "16.3.0",
+          "minArity": 0,
+          "maxArity": 0,
+          "params": []
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/createRef"
+    },
+    {
+      "package": "react",
+      "export": "forwardRef",
+      "kind": "function",
+      "availableIn": ">=16.3.0",
+      "signatures": [
+        {
+          "since": "16.3.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "render", "required": true, "description": "Render function receiving (props, ref)" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "19.0.0",
+          "message": "react.forwardRef is deprecated in React 19. Pass ref as a prop instead.",
+          "replacement": {
+            "package": "react",
+            "export": "ref",
+            "migrationHint": "Components receive ref as a regular prop in React 19. Remove forwardRef wrapper."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react/forwardRef"
+    },
+    {
+      "package": "react",
+      "export": "memo",
+      "kind": "function",
+      "availableIn": ">=16.6.0",
+      "signatures": [
+        {
+          "since": "16.6.0",
+          "minArity": 1,
+          "maxArity": 2,
+          "params": [
+            { "name": "Component", "required": true, "description": "Component to memoize" },
+            { "name": "arePropsEqual", "required": false, "description": "Custom comparison function" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/memo"
+    },
+    {
+      "package": "react",
+      "export": "lazy",
+      "kind": "function",
+      "availableIn": ">=16.6.0",
+      "signatures": [
+        {
+          "since": "16.6.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "load", "required": true, "description": "Function returning a Promise of a module with a default export" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/lazy"
+    },
+    {
+      "package": "react",
+      "export": "PropTypes",
+      "kind": "constant",
+      "availableIn": ">=0.14.0 <15.5.0",
+      "signatures": [],
+      "deprecations": [
+        {
+          "since": "15.5.0",
+          "removedIn": "19.0.0",
+          "message": "react.PropTypes was removed. Use the 'prop-types' package instead.",
+          "replacement": {
+            "package": "prop-types",
+            "export": "default",
+            "migrationHint": "Install 'prop-types' package and import PropTypes from 'prop-types'."
+          }
+        }
+      ]
+    },
+    {
+      "package": "react",
+      "export": "useInsertionEffect",
+      "kind": "hook",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 1,
+          "maxArity": 2,
+          "params": [
+            { "name": "setup", "required": true, "description": "Effect function for CSS-in-JS insertions" },
+            { "name": "dependencies", "required": false, "description": "Dependency array" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/useInsertionEffect"
+    },
+    {
+      "package": "react",
+      "export": "use",
+      "kind": "hook",
+      "availableIn": ">=19.0.0",
+      "signatures": [
+        {
+          "since": "19.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "resource", "required": true, "description": "Promise or Context to read" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react/use"
+    }
+  ]
+}

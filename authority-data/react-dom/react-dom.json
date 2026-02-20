@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "package": "react-dom",
+  "specs": [
+    {
+      "package": "react-dom",
+      "export": "createRoot",
+      "kind": "function",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 1,
+          "maxArity": 2,
+          "params": [
+            { "name": "container", "required": true, "description": "DOM element to render into" },
+            { "name": "options", "required": false, "description": "Configuration options" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react-dom/client/createRoot"
+    },
+    {
+      "package": "react-dom",
+      "export": "hydrateRoot",
+      "kind": "function",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 2,
+          "maxArity": 3,
+          "params": [
+            { "name": "domNode", "required": true, "description": "DOM element to hydrate" },
+            { "name": "reactNode", "required": true, "description": "React node to hydrate with" },
+            { "name": "options", "required": false, "description": "Configuration options" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react-dom/client/hydrateRoot"
+    },
+    {
+      "package": "react-dom",
+      "export": "render",
+      "kind": "function",
+      "availableIn": ">=0.14.0 <19.0.0",
+      "signatures": [
+        {
+          "since": "0.14.0",
+          "until": "19.0.0",
+          "minArity": 2,
+          "maxArity": 3,
+          "params": [
+            { "name": "element", "required": true, "description": "React element to render" },
+            { "name": "container", "required": true, "description": "DOM element to render into" },
+            { "name": "callback", "required": false, "description": "Callback after render" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "18.0.0",
+          "removedIn": "19.0.0",
+          "message": "react-dom.render is deprecated. Use createRoot().render() instead.",
+          "replacement": {
+            "package": "react-dom",
+            "export": "createRoot",
+            "migrationHint": "Replace ReactDOM.render(el, container) with createRoot(container).render(el)."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react-dom/render"
+    },
+    {
+      "package": "react-dom",
+      "export": "hydrate",
+      "kind": "function",
+      "availableIn": ">=16.0.0 <19.0.0",
+      "signatures": [
+        {
+          "since": "16.0.0",
+          "until": "19.0.0",
+          "minArity": 2,
+          "maxArity": 3,
+          "params": [
+            { "name": "element", "required": true, "description": "React element to hydrate" },
+            { "name": "container", "required": true, "description": "DOM element to hydrate into" },
+            { "name": "callback", "required": false, "description": "Callback after hydration" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "18.0.0",
+          "removedIn": "19.0.0",
+          "message": "react-dom.hydrate is deprecated. Use hydrateRoot() instead.",
+          "replacement": {
+            "package": "react-dom",
+            "export": "hydrateRoot",
+            "migrationHint": "Replace ReactDOM.hydrate(el, container) with hydrateRoot(container, el)."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react-dom/hydrate"
+    },
+    {
+      "package": "react-dom",
+      "export": "findDOMNode",
+      "kind": "function",
+      "availableIn": ">=0.14.0 <19.0.0",
+      "signatures": [
+        {
+          "since": "0.14.0",
+          "until": "19.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "componentInstance", "required": true, "description": "Class component instance" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "16.6.0",
+          "removedIn": "19.0.0",
+          "message": "react-dom.findDOMNode is deprecated. Use refs instead.",
+          "replacement": {
+            "package": "react",
+            "export": "createRef",
+            "migrationHint": "Use React.createRef() or useRef() and attach to the element via the ref prop."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react-dom/findDOMNode"
+    },
+    {
+      "package": "react-dom",
+      "export": "unmountComponentAtNode",
+      "kind": "function",
+      "availableIn": ">=0.14.0 <19.0.0",
+      "signatures": [
+        {
+          "since": "0.14.0",
+          "until": "19.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "container", "required": true, "description": "DOM element to unmount from" }
+          ]
+        }
+      ],
+      "deprecations": [
+        {
+          "since": "18.0.0",
+          "removedIn": "19.0.0",
+          "message": "react-dom.unmountComponentAtNode is deprecated. Use root.unmount() instead.",
+          "replacement": {
+            "package": "react-dom",
+            "export": "createRoot",
+            "migrationHint": "Use createRoot(container) then root.unmount() instead."
+          }
+        }
+      ],
+      "docsUrl": "https://react.dev/reference/react-dom/unmountComponentAtNode"
+    },
+    {
+      "package": "react-dom",
+      "export": "flushSync",
+      "kind": "function",
+      "availableIn": ">=18.0.0",
+      "signatures": [
+        {
+          "since": "18.0.0",
+          "minArity": 1,
+          "maxArity": 1,
+          "params": [
+            { "name": "callback", "required": true, "description": "Function to flush synchronously" }
+          ]
+        }
+      ],
+      "deprecations": [],
+      "docsUrl": "https://react.dev/reference/react-dom/flushSync"
+    }
+  ]
+}

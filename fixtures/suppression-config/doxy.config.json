@@ -1,0 +1,10 @@
+{
+  "suppressions": [
+    {
+      "package": "react",
+      "export": "createFactory",
+      "kind": "deprecated-api",
+      "reason": "Used in legacy adapter, isolated and tested"
+    }
+  ]
+}

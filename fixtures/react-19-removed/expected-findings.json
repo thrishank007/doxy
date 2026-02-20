@@ -1,0 +1,20 @@
+[
+  {
+    "longId": "dxy:react/createFactory:src/App.tsx:6:17",
+    "kind": "removed-api",
+    "severity": "error",
+    "message": "react.createFactory was removed in 19.0.0. Use React.createElement or JSX instead."
+  },
+  {
+    "longId": "dxy:react-dom/findDOMNode:src/App.tsx:11:18",
+    "kind": "removed-api",
+    "severity": "error",
+    "message": "react-dom.findDOMNode was removed in 19.0.0. Use refs instead."
+  },
+  {
+    "longId": "dxy:react/PropTypes:src/App.tsx:21:14",
+    "kind": "removed-api",
+    "severity": "error",
+    "message": "react.PropTypes was removed in 19.0.0. Use the 'prop-types' package instead."
+  }
+]

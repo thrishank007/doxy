@@ -1,0 +1,8 @@
+{
+  "name": "fixture-mixed-clean-and-dirty",
+  "private": true,
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}
