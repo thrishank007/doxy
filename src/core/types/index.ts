@@ -82,6 +82,7 @@ export type {
   ImportSpecifier,
   NormalizedCallExpression,
   NormalizedJSXElement,
+  NormalizedReference,
   NormalizedAST,
   LanguageParser,
 } from "./normalized-ast.js";

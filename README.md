@@ -24,7 +24,7 @@
 
 ---
 
-Think of doxy as **"caniuse for npm packages"** — it reads your lockfile versions and curated API data to find mismatches at lint time, with zero runtime cost.
+Think of doxy as **"caniuse for npm packages"** — it reads your installed or declared dependency versions and curated API data to find mismatches at lint time, with zero runtime cost.
 
 ```
 $ doxy verify
@@ -57,11 +57,10 @@ $ doxy verify
 - **Removed API detection** — errors when you use APIs removed in your installed version
 - **Future API detection** — errors when you use APIs that require a newer version than installed
 - **Wrong arity detection** — errors when you call functions with the wrong number of arguments
-- **Incremental analysis** — only re-analyzes changed files using git diff + content hashing
 - **Inline suppression** — silence specific findings with `// doxy-ignore` comments
 - **Config-level suppression** — suppress patterns project-wide with glob-based rules
-- **Multiple output formats** — human-readable, JSON, JSONL, SARIF
-- **Framework-aware** — understands React/Next.js import patterns and re-exports
+- **Multiple output formats** — human-readable, JSON, JSONL
+- **Framework-aware** — understands React import patterns and ReactDOM subpaths
 - **Fast** — powered by SWC for parsing (~100x faster than TypeScript compiler)
 
 ## Installation
@@ -86,14 +85,11 @@ yarn add -D doxy
 # Run verification on your project
 npx doxy verify
 
-# Only check changed files (great for CI)
-npx doxy verify --changed
-
 # Output as JSON for tooling integration
 npx doxy verify --json
 
-# Get detailed info about a specific finding
-npx doxy explain dxy_a1b2c3d4
+# Output as JSONL for agent or streaming workflows
+npx doxy verify --jsonl
 ```
 
 ## CLI Reference
@@ -103,14 +99,6 @@ npx doxy explain dxy_a1b2c3d4
 | Command | Description |
 |---|---|
 | `doxy verify [files...]` | Run verification (default command) |
-| `doxy init` | Initialize doxy in your project |
-| `doxy explain <finding-id>` | Detailed explanation of a finding |
-| `doxy cache status` | Show cache statistics |
-| `doxy cache clear` | Delete cached data |
-| `doxy authority list` | List loaded authority packages |
-| `doxy authority update` | Pull latest authority data |
-| `doxy authority show <pkg> [export]` | Inspect authority data for a package |
-| `doxy fix [files...]` | Apply auto-fixes |
 
 ### Verify Flags
 
@@ -118,17 +106,7 @@ npx doxy explain dxy_a1b2c3d4
 |---|---|
 | `--json` | Output findings as JSON |
 | `--jsonl` | Output findings as newline-delimited JSON |
-| `--sarif` | Output findings in SARIF format |
-| `--severity <level>` | Minimum severity to report (default: `warning`) |
-| `--fail-on <level>` | Exit non-zero threshold (default: `error`) |
-| `--changed` | Only analyze changed files |
-| `--base <ref>` | Git ref for diff base |
-| `--no-cache` | Disable caching |
-| `--framework <name@version>` | Override framework detection |
-| `--save-baseline` | Save current findings as baseline |
-| `--update-baseline` | Update baseline to current findings |
-| `--include-baseline` | Show baseline findings in output |
-| `--include-suppressed` | Show suppressed findings in output |
+| `[files...]` | Optional explicit files to analyze instead of config globs |
 
 ### Exit Codes
 
@@ -217,7 +195,7 @@ Lockfile ─────┘       │              │                      │
 3. **Query** — Each symbol is checked against curated authority data for your installed version
 4. **Emit** — Findings are generated with severity, messages, and fix suggestions
 5. **Filter** — Inline and config-level suppressions are applied
-6. **Cache** — Results are cached per-file with smart invalidation
+6. **Report** — Findings are emitted in human, JSON, or JSONL format
 
 doxy never executes your code. It reads your lockfile for installed versions and uses curated API specifications to detect issues statically.
 
@@ -226,9 +204,8 @@ doxy never executes your code. It reads your lockfile for installed versions and
 | Framework | Status | Packages |
 |---|---|---|
 | React | Supported | `react`, `react-dom` |
-| Next.js | Planned | `next` |
 
-Authority data currently covers **27 API specs** across React and ReactDOM, including hooks, lifecycle methods, rendering APIs, and more.
+Authority data currently covers React and ReactDOM APIs, including hooks, lifecycle methods, rendering APIs, and deprecation timelines.
 
 ## Finding Kinds
 
@@ -238,7 +215,6 @@ Authority data currently covers **27 API specs** across React and ReactDOM, incl
 | `removed-api` | error | API was removed in your installed version |
 | `future-api` | error | API requires a newer version than installed |
 | `wrong-arity` | error | Function called with wrong number of arguments |
-| `wrong-param` | error | Function called with wrong parameter names |
 | `unknown-export` | info | Export not found in authority data |
 
 ## CI Integration
@@ -247,12 +223,6 @@ Authority data currently covers **27 API specs** across React and ReactDOM, incl
 # GitHub Actions
 - name: Check API compatibility
   run: npx doxy verify --fail-on error
-```
-
-```yaml
-# With JSON output for annotations
-- name: Check API compatibility
-  run: npx doxy verify --json > doxy-results.json
 ```
 
 doxy writes **findings to stdout** and **everything else to stderr**, making it easy to pipe and parse output in CI pipelines.
@@ -273,17 +243,17 @@ npm run check    # typecheck + lint + test
 ```
 doxy/
 ├── src/
-│   ├── cli/                 CLI entry point + commands
+│   ├── cli/                 `verify` command + reporters
 │   ├── core/                Pure analysis logic
 │   │   ├── types/           All shared type definitions
 │   │   ├── repo-context/    Version detection from manifests
+│   │   ├── files/           File discovery from config globs
 │   │   ├── import-resolver/ Import → package/export mapping
+│   │   ├── analyzer/        Per-file analysis orchestration
 │   │   ├── suppression/     Inline + config suppression
-│   │   └── analyzer/        Per-file analysis orchestration
 │   ├── authority/           Authority data store
 │   ├── adapters/            Framework-specific adapters
 │   ├── parser/              SWC-based AST parsing
-│   └── incremental/         Git diff + caching
 ├── authority-data/          Curated API spec datasets
 └── fixtures/                Test fixture mini-projects
 ```

@@ -63,6 +63,14 @@ export interface NormalizedJSXElement {
   location: SourceLocation;
 }
 
+/** A non-call symbol reference such as React.PropTypes */
+export interface NormalizedReference {
+  /** The referenced symbol as a string */
+  symbol: string;
+  /** Location of the reference */
+  location: SourceLocation;
+}
+
 /** The complete normalized AST for a single file */
 export interface NormalizedAST {
   /** All import declarations (including require calls) */
@@ -71,6 +79,8 @@ export interface NormalizedAST {
   callExpressions: NormalizedCallExpression[];
   /** All JSX elements */
   jsxElements: NormalizedJSXElement[];
+  /** Non-call symbol references */
+  references: NormalizedReference[];
 }
 
 /** Language parser contract */

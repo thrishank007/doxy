@@ -12,7 +12,7 @@
     "message": "react-dom.findDOMNode was removed in 19.0.0. Use refs instead."
   },
   {
-    "longId": "dxy:react/PropTypes:src/App.tsx:21:14",
+    "longId": "dxy:react/PropTypes:src/App.tsx:21:12",
     "kind": "removed-api",
     "severity": "error",
     "message": "react.PropTypes was removed in 19.0.0. Use the 'prop-types' package instead."

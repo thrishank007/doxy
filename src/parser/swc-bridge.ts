@@ -10,6 +10,7 @@ import type {
   NormalizedImport,
   NormalizedCallExpression,
   NormalizedJSXElement,
+  NormalizedReference,
   ImportSpecifier,
   LanguageParser,
   SourceLocation,
@@ -29,43 +30,73 @@ function syntaxFor(filePath: string): { syntax: "typescript" | "ecmascript"; tsx
  * Convert SWC span to SourceLocation.
  * SWC provides line/column as 1-based line, 0-based column.
  */
-function toLocation(span: { start: number; end: number }, file: string, lines: number[]): SourceLocation {
+function toLocation(
+  span: { start: number; end: number },
+  file: string,
+  lines: LineInfo[],
+): SourceLocation {
   const startLine = findLine(lines, span.start);
-  const startCol = span.start - (lines[startLine - 1] ?? 0);
   const endLine = findLine(lines, span.end);
-  const endCol = span.end - (lines[endLine - 1] ?? 0);
+  const startCol = findColumn(lines[startLine - 1]!, span.start);
+  const endCol = findColumn(lines[endLine - 1]!, span.end);
   return { file, line: startLine, column: startCol, endLine, endColumn: endCol };
 }
 
 /**
- * Build a line offset table from source text.
- * lines[i] = byte offset of the start of line i+1.
+ * Build byte-aware line info from source text.
  */
-function buildLineOffsets(source: string): number[] {
-  const offsets: number[] = [0]; // line 1 starts at offset 0
-  for (let i = 0; i < source.length; i++) {
-    if (source[i] === "\n") {
-      offsets.push(i + 1);
+interface LineInfo {
+  startByte: number;
+  rawText: string;
+}
+
+function buildLineOffsets(source: string, spanStart: number): LineInfo[] {
+  const rawLines = source.split("\n");
+  const lines: LineInfo[] = [];
+  let startByte = spanStart;
+
+  for (let i = 0; i < rawLines.length; i++) {
+    const rawText = rawLines[i] ?? "";
+    lines.push({ startByte, rawText });
+    startByte += Buffer.byteLength(rawText);
+    if (i < rawLines.length - 1) {
+      startByte += 1; // newline byte
     }
   }
-  return offsets;
+
+  return lines;
 }
 
 /**
- * Find the 1-based line number for a given byte offset.
+ * Find the 1-based line number for a given SWC byte offset.
  */
-function findLine(offsets: number[], offset: number): number {
+function findLine(offsets: LineInfo[], offset: number): number {
   let lo = 0;
   let hi = offsets.length - 1;
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1;
-    if ((offsets[mid] ?? 0) <= offset) {
+    if ((offsets[mid]?.startByte ?? 1) <= offset) {
       lo = mid;
     } else {
       hi = mid - 1;
     }
   }
   return lo + 1; // 1-based
+}
+
+function findColumn(line: LineInfo, offset: number): number {
+  let currentByte = line.startByte;
+  let column = 1;
+
+  for (const char of line.rawText) {
+    if (currentByte >= offset) {
+      break;
+    }
+    currentByte += Buffer.byteLength(char);
+    column += 1;
+  }
+
+  return column;
 }
 
 /**
@@ -84,16 +115,25 @@ export class SwcParser implements LanguageParser {
       target: "es2022",
     });
 
-    const lines = buildLineOffsets(source);
+    const lines = buildLineOffsets(source, module.span.start);
     const imports: NormalizedImport[] = [];
     const callExpressions: NormalizedCallExpression[] = [];
     const jsxElements: NormalizedJSXElement[] = [];
+    const references: NormalizedReference[] = [];
 
     for (const item of module.body) {
-      extractFromModuleItem(item, filePath, lines, imports, callExpressions, jsxElements);
+      extractFromModuleItem(
+        item,
+        filePath,
+        lines,
+        imports,
+        callExpressions,
+        jsxElements,
+        references,
+      );
     }
 
-    return { imports, callExpressions, jsxElements };
+    return { imports, callExpressions, jsxElements, references };
   }
 }
 
@@ -102,10 +142,11 @@ export class SwcParser implements LanguageParser {
 function extractFromModuleItem(
   item: ModuleItem,
   file: string,
-  lines: number[],
+  lines: LineInfo[],
   imports: NormalizedImport[],
   calls: NormalizedCallExpression[],
   jsxElements: NormalizedJSXElement[],
+  references: NormalizedReference[],
 ): void {
   switch (item.type) {
     case "ImportDeclaration":
@@ -113,20 +154,48 @@ function extractFromModuleItem(
       break;
     case "ExportDeclaration":
       if (item.declaration) {
-        extractFromStatement(item.declaration, file, lines, calls, jsxElements);
+        extractFromStatement(
+          item.declaration,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       }
       break;
     case "ExportDefaultDeclaration":
       if (item.decl && "type" in item.decl) {
-        extractFromExpression(item.decl as Expression, file, lines, calls, jsxElements);
+        extractFromExpression(
+          item.decl as Expression,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       }
       break;
     case "ExportDefaultExpression":
-      extractFromExpression(item.expression, file, lines, calls, jsxElements);
+      extractFromExpression(
+        item.expression,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     default:
       if ("type" in item) {
-        extractFromStatement(item as Statement, file, lines, calls, jsxElements);
+        extractFromStatement(
+          item as Statement,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       }
   }
 }
@@ -135,7 +204,7 @@ function extractImportDeclaration(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   node: any,
   file: string,
-  lines: number[],
+  lines: LineInfo[],
 ): NormalizedImport {
   const specifiers: ImportSpecifier[] = [];
   let hasDefault = false;
@@ -177,13 +246,21 @@ function extractImportDeclaration(
 function extractFromStatement(
   stmt: Statement,
   file: string,
-  lines: number[],
+  lines: LineInfo[],
   calls: NormalizedCallExpression[],
   jsxElements: NormalizedJSXElement[],
+  references: NormalizedReference[],
 ): void {
   switch (stmt.type) {
     case "ExpressionStatement":
-      extractFromExpression(stmt.expression, file, lines, calls, jsxElements);
+      extractFromExpression(
+        stmt.expression,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     case "VariableDeclaration":
       for (const decl of stmt.declarations) {
@@ -192,31 +269,97 @@ function extractFromStatement(
           if (decl.init.type === "CallExpression" && isRequireCall(decl.init)) {
             extractRequire(decl, file, lines, calls);
           } else {
-            extractFromExpression(decl.init, file, lines, calls, jsxElements);
+            extractFromExpression(
+              decl.init,
+              file,
+              lines,
+              calls,
+              jsxElements,
+              references,
+            );
           }
         }
       }
       break;
     case "ReturnStatement":
-      if (stmt.argument) extractFromExpression(stmt.argument, file, lines, calls, jsxElements);
+      if (stmt.argument) {
+        extractFromExpression(
+          stmt.argument,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
+      }
       break;
     case "IfStatement":
-      extractFromExpression(stmt.test, file, lines, calls, jsxElements);
-      extractFromStatement(stmt.consequent, file, lines, calls, jsxElements);
-      if (stmt.alternate) extractFromStatement(stmt.alternate, file, lines, calls, jsxElements);
+      extractFromExpression(
+        stmt.test,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
+      extractFromStatement(
+        stmt.consequent,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
+      if (stmt.alternate) {
+        extractFromStatement(
+          stmt.alternate,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
+      }
       break;
     case "BlockStatement":
-      for (const s of stmt.stmts) extractFromStatement(s, file, lines, calls, jsxElements);
+      for (const s of stmt.stmts) {
+        extractFromStatement(s, file, lines, calls, jsxElements, references);
+      }
       break;
     case "FunctionDeclaration":
-      if (stmt.body) extractFromStatement(stmt.body, file, lines, calls, jsxElements);
+      if (stmt.body) {
+        extractFromStatement(
+          stmt.body,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
+      }
       break;
     case "ClassDeclaration":
       for (const member of stmt.body) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const m = member as any;
-        if (m.value?.body) {
-          extractFromStatement(m.value.body, file, lines, calls, jsxElements);
+        if (m.function?.body) {
+          extractFromStatement(
+            m.function.body,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
+        } else if (m.value?.body) {
+          extractFromStatement(
+            m.value.body,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         }
       }
       break;
@@ -228,9 +371,10 @@ function extractFromStatement(
 function extractFromExpression(
   expr: Expression,
   file: string,
-  lines: number[],
+  lines: LineInfo[],
   calls: NormalizedCallExpression[],
   jsxElements: NormalizedJSXElement[],
+  references: NormalizedReference[],
 ): void {
   if (!expr) return;
 
@@ -247,77 +391,209 @@ function extractFromExpression(
       }
       // Recurse into arguments
       for (const arg of expr.arguments) {
-        extractFromExpression(arg.expression, file, lines, calls, jsxElements);
+        extractFromExpression(
+          arg.expression,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       }
       break;
     }
     case "ArrowFunctionExpression":
       if (expr.body.type === "BlockStatement") {
-        extractFromStatement(expr.body, file, lines, calls, jsxElements);
+        extractFromStatement(
+          expr.body,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       } else {
-        extractFromExpression(expr.body, file, lines, calls, jsxElements);
+        extractFromExpression(
+          expr.body,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
       }
       break;
     case "FunctionExpression":
-      if (expr.body) extractFromStatement(expr.body, file, lines, calls, jsxElements);
+      if (expr.body) {
+        extractFromStatement(
+          expr.body,
+          file,
+          lines,
+          calls,
+          jsxElements,
+          references,
+        );
+      }
       break;
     case "ParenthesisExpression":
-      extractFromExpression(expr.expression, file, lines, calls, jsxElements);
+      extractFromExpression(
+        expr.expression,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     case "ConditionalExpression":
-      extractFromExpression(expr.test, file, lines, calls, jsxElements);
-      extractFromExpression(expr.consequent, file, lines, calls, jsxElements);
-      extractFromExpression(expr.alternate, file, lines, calls, jsxElements);
+      extractFromExpression(
+        expr.test,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
+      extractFromExpression(
+        expr.consequent,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
+      extractFromExpression(
+        expr.alternate,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     case "SequenceExpression":
-      for (const e of expr.expressions) extractFromExpression(e, file, lines, calls, jsxElements);
+      for (const e of expr.expressions) {
+        extractFromExpression(e, file, lines, calls, jsxElements, references);
+      }
       break;
     case "AssignmentExpression":
-      extractFromExpression(expr.right, file, lines, calls, jsxElements);
+      extractFromExpression(
+        expr.right,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     case "MemberExpression":
-      // Not a call by itself, just traversing
+      {
+        const symbol = calleeToString(expr);
+        if (symbol) {
+          references.push({
+            symbol,
+            location: toLocation(expr.span, file, lines),
+          });
+        }
+      }
       break;
     case "JSXElement":
       jsxElements.push(extractJSXElement(expr, file, lines));
       // Recurse into children
       for (const child of expr.children) {
         if (child.type === "JSXExpressionContainer" && child.expression.type !== "JSXEmptyExpression") {
-          extractFromExpression(child.expression, file, lines, calls, jsxElements);
+          extractFromExpression(
+            child.expression,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         } else if (child.type === "JSXElement") {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          extractFromExpression(child as any, file, lines, calls, jsxElements);
+          extractFromExpression(
+            child as unknown as Expression,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         }
       }
       break;
     case "JSXFragment":
       for (const child of expr.children) {
         if (child.type === "JSXExpressionContainer" && child.expression.type !== "JSXEmptyExpression") {
-          extractFromExpression(child.expression, file, lines, calls, jsxElements);
+          extractFromExpression(
+            child.expression,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         } else if (child.type === "JSXElement") {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          extractFromExpression(child as any, file, lines, calls, jsxElements);
+          extractFromExpression(
+            child as unknown as Expression,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         }
       }
       break;
     case "TaggedTemplateExpression":
-      extractFromExpression(expr.tag, file, lines, calls, jsxElements);
+      extractFromExpression(
+        expr.tag,
+        file,
+        lines,
+        calls,
+        jsxElements,
+        references,
+      );
       break;
     case "TemplateLiteral":
-      for (const e of expr.expressions) extractFromExpression(e, file, lines, calls, jsxElements);
+      for (const e of expr.expressions) {
+        extractFromExpression(e, file, lines, calls, jsxElements, references);
+      }
       break;
     case "ArrayExpression":
       for (const el of expr.elements) {
-        if (el?.expression) extractFromExpression(el.expression, file, lines, calls, jsxElements);
+        if (el?.expression) {
+          extractFromExpression(
+            el.expression,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
+        }
       }
       break;
     case "ObjectExpression":
       for (const prop of expr.properties) {
         if (prop.type === "KeyValueProperty") {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          extractFromExpression((prop as any).value, file, lines, calls, jsxElements);
+          extractFromExpression(
+            (prop as { value: Expression }).value,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         } else if (prop.type === "SpreadElement") {
-          extractFromExpression(prop.arguments, file, lines, calls, jsxElements);
+          extractFromExpression(
+            prop.arguments,
+            file,
+            lines,
+            calls,
+            jsxElements,
+            references,
+          );
         }
       }
       break;
@@ -355,7 +631,7 @@ function isRequireCall(expr: any): boolean {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractRequire(decl: any, _file: string, _lines: number[], _calls: NormalizedCallExpression[]): void {
+function extractRequire(decl: any, _file: string, _lines: LineInfo[], _calls: NormalizedCallExpression[]): void {
   // require() calls are tracked as imports, not call expressions
   // The import resolver handles require patterns separately
   // We just note them here for potential future use
@@ -379,7 +655,7 @@ function extractArgNames(args: any[]): string[] {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractJSXElement(expr: any, file: string, lines: number[]): NormalizedJSXElement {
+function extractJSXElement(expr: any, file: string, lines: LineInfo[]): NormalizedJSXElement {
   const opening = expr.opening;
   let tagName = "unknown";
   if (opening?.name) {

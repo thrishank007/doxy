@@ -122,6 +122,32 @@ export function resolveImports(
     });
   }
 
+  // Step 2b: Resolve non-call references such as React.PropTypes
+  for (const reference of ast.references) {
+    const resolved = resolveCallee(
+      reference.symbol,
+      bindings,
+      namespacesAndDefaults,
+    );
+    if (!resolved) continue;
+
+    const key = `${resolved.package}/${resolved.exportName}`;
+    let usage = usageMap.get(key);
+    if (!usage) {
+      usage = {
+        package: resolved.package,
+        export: resolved.exportName,
+        importKind: resolved.importKind,
+        usageSites: [],
+      };
+      usageMap.set(key, usage);
+    }
+
+    usage.usageSites.push({
+      location: reference.location,
+    });
+  }
+
   // Step 3: Add import-only usages (symbols imported but not necessarily called)
   // This catches deprecated imports even without call sites
   for (const [, binding] of bindings) {

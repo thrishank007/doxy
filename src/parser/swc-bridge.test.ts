@@ -157,6 +157,16 @@ describe("SwcParser", () => {
       expect(call).toBeDefined();
       expect(call!.argCount).toBe(0);
     });
+
+    it("extracts non-call member references", () => {
+      const ast = parser.parse(
+        `import React from "react";\nconst pt = React.PropTypes;`,
+        "test.ts",
+      );
+      const ref = ast.references.find((c) => c.symbol === "React.PropTypes");
+      expect(ref).toBeDefined();
+      expect(ref!.location.line).toBe(2);
+    });
   });
 
   describe("JSX elements", () => {

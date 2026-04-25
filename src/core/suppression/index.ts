@@ -9,7 +9,13 @@
  * Kind values: deprecated-api, removed-api, future-api, wrong-arity, wrong-param, unknown-export, or * for all.
  * Reason is freeform text after "—", "--", or ":".
  */
-import type { ViolationKind, InlineSuppression } from "../types/index.js";
+import picomatch from "picomatch";
+import type {
+  ViolationKind,
+  InlineSuppression,
+  SuppressionRule,
+  Finding,
+} from "../types/index.js";
 
 const VALID_KINDS = new Set<string>([
   "deprecated-api",
@@ -125,4 +131,28 @@ export function isLineSuppressed(
     if (sup.kind === "*" || sup.kind === kind) return sup;
   }
   return undefined;
+}
+
+/**
+ * Check whether a finding is suppressed by a config-level rule.
+ */
+export function findMatchingSuppressionRule(
+  finding: Finding,
+  rules: SuppressionRule[],
+): SuppressionRule | undefined {
+  return rules.find((rule) => matchesSuppressionRule(finding, rule));
+}
+
+function matchesSuppressionRule(
+  finding: Finding,
+  rule: SuppressionRule,
+): boolean {
+  if (rule.kind !== "*" && rule.kind !== finding.kind) return false;
+  if (rule.package && rule.package !== finding.symbol.package) return false;
+  if (rule.export && rule.export !== finding.symbol.export) return false;
+
+  if (!rule.paths || rule.paths.length === 0) return true;
+
+  const normalizedPath = finding.location.file.replace(/\\/g, "/");
+  return rule.paths.some((pattern) => picomatch(pattern)(normalizedPath));
 }
