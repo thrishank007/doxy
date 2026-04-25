@@ -23,7 +23,7 @@ function syntaxFor(filePath: string): { syntax: "typescript" | "ecmascript"; tsx
   if (filePath.endsWith(".tsx")) return { syntax: "typescript", tsx: true };
   if (filePath.endsWith(".ts")) return { syntax: "typescript", tsx: false };
   if (filePath.endsWith(".jsx")) return { syntax: "ecmascript", jsx: true };
-  return { syntax: "ecmascript", jsx: false };
+  return { syntax: "ecmascript", jsx: true };
 }
 
 /**

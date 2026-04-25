@@ -1,39 +1,24 @@
 #!/usr/bin/env node
 
 import { ExitCode } from "../core/types/index.js";
+import { parseVerifyArgs } from "./args.js";
 import { runVerify } from "./verify.js";
 
-type ReportFormat = "human" | "json" | "jsonl";
-
 async function main(): Promise<void> {
-  const rawArgs = process.argv.slice(2);
-  const args = rawArgs[0] === "verify" ? rawArgs.slice(1) : rawArgs;
-
-  let format: ReportFormat = "human";
-  const files: string[] = [];
-
-  for (const arg of args) {
-    if (arg === "--json") {
-      format = "json";
-      continue;
-    }
-    if (arg === "--jsonl") {
-      format = "jsonl";
-      continue;
-    }
-    files.push(arg);
-  }
-
-  if (args.includes("--json") && args.includes("--jsonl")) {
-    process.stderr.write("Choose either --json or --jsonl, not both.\n");
+  let args: ReturnType<typeof parseVerifyArgs>;
+  try {
+    args = parseVerifyArgs(process.argv.slice(2));
+  } catch (error) {
+    process.stderr.write(error instanceof Error ? `${error.message}\n` : "Invalid arguments.\n");
     process.exitCode = ExitCode.CONFIG_ERROR;
     return;
   }
 
   const result = await runVerify({
     root: process.cwd(),
-    files,
-    format,
+    files: args.files,
+    format: args.format,
+    failOn: args.failOn,
   });
 
   if (result.stdout) {

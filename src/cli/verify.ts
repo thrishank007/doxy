@@ -11,6 +11,7 @@ export interface RunVerifyOptions {
   root: string;
   files?: string[];
   format?: ReportFormat;
+  failOn?: Severity;
 }
 
 export interface RunVerifyResult {
@@ -37,12 +38,13 @@ export async function runVerify(
       config,
     });
 
+    const failOn = options.failOn ?? config.failOn;
     const findings = result.findings.filter((finding) =>
       passesSeverityFloor(finding.severity, config.severity)
     );
     const summary = summarizeFindings(findings);
     const exitCode = summary.total > 0 &&
-      findings.some((finding) => passesSeverityFloor(finding.severity, config.failOn))
+      findings.some((finding) => passesSeverityFloor(finding.severity, failOn))
       ? ExitCode.VIOLATIONS_FOUND
       : ExitCode.CLEAN;
 

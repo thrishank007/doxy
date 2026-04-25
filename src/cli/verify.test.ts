@@ -42,4 +42,11 @@ describe("runVerify", () => {
     expect(lines[0]?.type).toBe("finding");
     expect(lines.at(-1)?.type).toBe("summary");
   });
+
+  it("uses failOn to decide the process exit code", async () => {
+    const fixture = await loadFixture("react-18-deprecated");
+    const result = await runVerify({ root: fixture.root, failOn: "warning" });
+
+    expect(result.exitCode).toBe(1);
+  });
 });

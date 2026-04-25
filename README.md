@@ -106,6 +106,7 @@ npx doxy verify --jsonl
 |---|---|
 | `--json` | Output findings as JSON |
 | `--jsonl` | Output findings as newline-delimited JSON |
+| `--fail-on <severity>` | Exit non-zero for findings at or above `error`, `warning`, or `info` |
 | `[files...]` | Optional explicit files to analyze instead of config globs |
 
 ### Exit Codes

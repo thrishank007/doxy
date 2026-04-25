@@ -11,6 +11,21 @@ describe("SwcParser", () => {
       expect(parser.extensions).toContain(".js");
       expect(parser.extensions).toContain(".jsx");
     });
+
+    it("parses JSX inside .js files for common React projects", () => {
+      const ast = parser.parse(
+        `
+        import React from "react";
+
+        export function App() {
+          return <div className="app">Hello</div>;
+        }
+        `,
+        "App.js",
+      );
+
+      expect(ast.jsxElements.some((element) => element.tagName === "div")).toBe(true);
+    });
   });
 
   describe("imports", () => {
